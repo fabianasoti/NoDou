@@ -218,58 +218,128 @@ if (!isset($_SESSION['usuario_id'])) {
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $usuario_id = $_SESSION['usuario_id'];
+    
+    // Datos Generales
     $titulo = trim($_POST['titulo']);
     $monto_total = floatval($_POST['monto_total']);
     $fecha_gasto = $_POST['fecha_gasto'];
     $metodo_division = $_POST['metodo_division'];
-    $participantes = $_POST['participantes']; // Esto es un array
+    
+    // Arrays del formulario
+    $nombres = $_POST['nombres']; // Lista de nombres de participantes
 
-    // Iniciamos una transacción para asegurar la integridad de los datos
     $conexion->begin_transaction();
 
     try {
-        // 1. Insertar la cabecera del gasto
+        // 1. Insertar Cabecera
         $stmt = $conexion->prepare("INSERT INTO gastos (usuario_id, titulo, monto_total, metodo_division, fecha_gasto) VALUES (?, ?, ?, ?, ?)");
         $stmt->bind_param("isdss", $usuario_id, $titulo, $monto_total, $metodo_division, $fecha_gasto);
         $stmt->execute();
-        
-        // Obtenemos el ID del gasto recién creado
         $gasto_id = $conexion->insert_id;
 
-        // 2. Lógica de cálculo de montos
-        $num_participantes = count($participantes);
+        // 2. Preparar insert de detalle
+        $stmt_detalle = $conexion->prepare("INSERT INTO detalle_gasto (gasto_id, nombre_participante, monto_asignado, porcentaje) VALUES (?, ?, ?, ?)");
+        
+        $num_participantes = count($nombres);
+
+        // --- LÓGICA SEGÚN MÉTODO ---
         
         if ($metodo_division === 'iguales') {
             $monto_por_persona = $monto_total / $num_participantes;
-            
-            $stmt_detalle = $conexion->prepare("INSERT INTO detalle_gasto (gasto_id, nombre_participante, monto_asignado) VALUES (?, ?, ?)");
-            
-            foreach ($participantes as $nombre) {
+            $pct = 100 / $num_participantes;
+
+            foreach ($nombres as $nombre) {
                 $nombre_limpio = trim($nombre);
-                if (!empty($nombre_limpio)) {
-                    $stmt_detalle->bind_param("isd", $gasto_id, $nombre_limpio, $monto_por_persona);
-                    $stmt_detalle->execute();
+                if($nombre_limpio === '') $nombre_limpio = "Anónimo";
+                $stmt_detalle->bind_param("isdd", $gasto_id, $nombre_limpio, $monto_por_persona, $pct);
+                $stmt_detalle->execute();
+            }
+
+        } elseif ($metodo_division === 'porcentaje') {
+            $porcentajes_input = $_POST['porcentajes']; // Array de porcentajes
+
+            foreach ($nombres as $index => $nombre) {
+                $nombre_limpio = trim($nombre);
+                if($nombre_limpio === '') $nombre_limpio = "Anónimo";
+
+                $pct_user = floatval($porcentajes_input[$index]);
+                $monto_user = $monto_total * ($pct_user / 100);
+
+                $stmt_detalle->bind_param("isdd", $gasto_id, $nombre_limpio, $monto_user, $pct_user);
+                $stmt_detalle->execute();
+            }
+
+        } elseif ($metodo_division === 'articulos') {
+            // Guardar Artículos en tabla `articulos_gasto` y calcular deuda
+            // Nota: Este cálculo es complejo porque recibimos datos planos del HTML.
+            // Reconstruiremos la lógica: Recorremos items, vemos precio, vemos owners (que no vienen directos en un array simple por POST en HTML standard sin índices complejos).
+            
+            // TRUCO: En el frontend no envié estructura compleja de articulos_owners para simplificar el JS. 
+            // Para 'articulos', la forma más segura en PHP puro sin JSON es confiar en el JS calculation o enviar un JSON stringificado.
+            // PERO, vamos a hacerlo robusto: Vamos a recalcular las deudas por persona en base a lo que el usuario envió.
+            
+            // Como el POST de checkboxes anidados es complejo, confiaremos en un truco:
+            // Vamos a leer los arrays 'articulos_nombres' y 'articulos_precios'.
+            // Pero saber "quién chequeó qué" es difícil con HTML standard forms dinámicos.
+            // SOLUCIÓN: Haremos que el guardado sea sencillo. Asumiremos montos iguales para simplificar el backend si no usamos AJAX JSON.
+            // **CORRECCIÓN:** Para que funcione perfecto como pediste, lo mejor es enviar los montos FINALES calculados por JS en un input hidden, O usar el método de 'iguales' en el backend si la lógica de items es solo visual.
+            
+            // IMPLEMENTACIÓN RECOMENDADA PARA ESTE NIVEL:
+            // Vamos a guardar los items solo como referencia visual y guardar la deuda calculada.
+            
+            // 1. Guardar items en DB
+            $art_nombres = $_POST['articulos_nombres'] ?? [];
+            $art_precios = $_POST['articulos_precios'] ?? [];
+            
+            $stmt_art = $conexion->prepare("INSERT INTO articulos_gasto (gasto_id, nombre_articulo, precio) VALUES (?, ?, ?)");
+            for($i=0; $i < count($art_nombres); $i++) {
+                $nom = $art_nombres[$i];
+                $pre = $art_precios[$i];
+                if(!empty($nom)) {
+                    $stmt_art->bind_param("isd", $gasto_id, $nom, $pre);
+                    $stmt_art->execute();
                 }
             }
-        } 
-        // Aquí podrías añadir else if para 'porcentaje' o 'articulos'
-        
-        // Si todo salió bien, confirmamos los cambios
+
+            // 2. ¿Cómo sabemos cuánto paga cada uno? 
+            // Como HTML Forms no envía arrays anidados fácilmente para checkboxes dinámicos,
+            // lo más fácil es dividir el TOTAL entre participantes (como iguales) O
+            // pedirle al usuario que confirme los montos.
+            
+            // PARA ARREGLARLO AHORA: Vamos a dividir el total entre todos como fallback, 
+            // PERO si quieres precisión exacta, necesitamos inyectar inputs hidden desde JS con el monto final de cada uno.
+            // Vamos a modificar nueva_cuenta.php ligeramente para incluir un input hidden "monto_final_calculado[]".
+            
+            // (Asumiendo que añadimos el input hidden en el JS - ver abajo nota explicativa)
+             if (isset($_POST['montos_finales'])) {
+                $montos_finales = $_POST['montos_finales'];
+                foreach ($nombres as $index => $nombre) {
+                     $monto_calc = floatval($montos_finales[$index]);
+                     $pct_dummy = 0; // No aplica
+                     $stmt_detalle->bind_param("isdd", $gasto_id, $nombre, $monto_calc, $pct_dummy);
+                     $stmt_detalle->execute();
+                }
+             } else {
+                 // Fallback por si falla JS: División igualitaria
+                 $monto_por_persona = $monto_total / $num_participantes;
+                 $pct = 0;
+                 foreach ($nombres as $nombre) {
+                    $stmt_detalle->bind_param("isdd", $gasto_id, $nombre, $monto_por_persona, $pct);
+                    $stmt_detalle->execute();
+                 }
+             }
+        }
+
         $conexion->commit();
-        
-        // Redirigimos al dashboard con éxito
         header("Location: ../pages/dashboard.php?status=gasto_guardado");
         exit();
 
-    } catch (mysqli_sql_exception $e) {
-        // Si algo falla, deshacemos cualquier cambio en la DB
+    } catch (Exception $e) {
         $conexion->rollback();
-        die("Error al registrar el gasto: " . $e->getMessage());
+        die("Error: " . $e->getMessage());
     }
-} else {
-    header("Location: ../pages/nueva_cuenta.php");
-    exit();
 }
+?>
 
 ```
 **login.php**
@@ -1233,13 +1303,7 @@ if (!isset($_SESSION['usuario_id'])) {
 }
 require_once '../config/conexion.php';
 
-// Obtenemos los contactos frecuentes para el selector rápido
 $usuario_id = $_SESSION['usuario_id'];
-$query_contactos = "SELECT id, nombre_contacto FROM contactos WHERE usuario_id = ?";
-$stmt = $conexion->prepare($query_contactos);
-$stmt->bind_param("i", $usuario_id);
-$stmt->execute();
-$contactos = $stmt->get_result();
 ?>
 
 <!DOCTYPE html>
@@ -1250,15 +1314,166 @@ $contactos = $stmt->get_result();
     <title>Nueva Cuenta - NoDou</title>
     <link rel="stylesheet" href="../assets/css/estilos.css">
     <style>
-        .form-section { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .step-title { color: #5a189a; border-bottom: 2px solid #f0e6ff; margin-bottom: 15px; padding-bottom: 5px; }
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-        .input-group input, .input-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
-        .btn-add { background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+        .form-section { 
+            background: white; 
+            padding: 25px; /* Más espacio interno */
+            border-radius: 15px; 
+            margin-bottom: 25px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+        }
+
+        .step-title { 
+            color: #5a189a; 
+            border-bottom: 2px solid #f0e6ff; 
+            margin-bottom: 20px; 
+            padding-bottom: 10px; 
+            font-size: 1.2rem;
+        }
+
+        /* --- MEJORAS EN LA FILA DE PARTICIPANTES --- */
+        .fila-participante { 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; /* Más espacio entre nombre, % y precio */
+            margin-bottom: 15px; 
+            padding: 10px; 
+            background: #FAFAFA; 
+            border: 1px solid #eee;
+            border-radius: 12px; 
+            transition: background 0.3s;
+        }
+
+        .fila-participante:hover {
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-color: #ddd;
+        }
+
+        /* El input del nombre ahora ocupa todo el espacio disponible */
+        .fila-participante input[type="text"] { 
+            flex-grow: 1; /* Crece para ocupar espacio vacío */
+            width: auto; /* Se adapta */
+            min-width: 150px; /* Nunca será demasiado pequeño */
+            margin: 0; 
+            padding: 12px;
+            font-size: 1rem;
+        }
+
+        .info-calculo { 
+            min-width: 80px; /* Espacio fijo para el precio */
+            text-align: right; 
+            font-weight: bold; 
+            color: var(--indigo); 
+            font-size: 1rem; 
+        }
+
+        .input-pct { 
+            width: 70px !important; 
+            margin: 0 !important; 
+            text-align: center; 
+            font-weight: bold;
+        }
+
+        /* Botón de Eliminar (X) más estético */
+        .btn-remove { 
+            background: #ffebEE; 
+            color: #d32f2f; 
+            border: 1px solid #ffcdd2; 
+            width: 36px;
+            height: 36px;
+            border-radius: 50%; /* Redondo */
+            cursor: pointer; 
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            margin-left: 5px;
+            padding: 0; /* Reset del padding */
+        }
+
+        .btn-remove:hover {
+            background: #d32f2f;
+            color: white;
+            border-color: #b71c1c;
+            transform: scale(1.1);
+        }
+
+        /* Botón Añadir Persona / Artículo */
+        .btn-add { 
+            background: #e8f5e9; 
+            color: #2e7d32; 
+            border: 1px solid #c8e6c9;
+            padding: 12px 20px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 0.95rem; 
+            font-weight: 600;
+            width: 100%; /* Ocupa todo el ancho para ser fácil de tocar */
+            transition: all 0.2s;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-add:hover {
+            background: #2e7d32;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(46, 125, 50, 0.2);
+        }
+
+        /* --- ESTILOS ARTÍCULOS --- */
+        .item-row { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 12px; 
+            align-items: center; 
+            border: 1px solid #eee;
+            padding: 15px; 
+            border-radius: 12px;
+            margin-bottom: 15px; 
+            background: #fafafa;
+        }
+
+        .item-row input { margin: 0 !important; }
+
+        .participantes-item { 
+            width: 100%; 
+            display: flex; 
+            gap: 8px; 
+            flex-wrap: wrap; 
+            margin-top: 10px; 
+            padding-top: 10px;
+            border-top: 1px dashed #ddd;
+        }
+
+        .check-pill { 
+            background: white; 
+            border: 1px solid #ddd;
+            padding: 6px 14px; 
+            border-radius: 20px; 
+            font-size: 0.85rem; 
+            cursor: pointer; 
+            user-select: none; 
+            transition: all 0.2s;
+        }
+
+        .check-pill:hover { background: #f0f0f0; }
+
+        .check-pill.active { 
+            background: var(--indigo); 
+            color: white; 
+            border-color: var(--indigo);
+            box-shadow: 0 2px 5px rgba(63, 81, 181, 0.3);
+        }
+
         .hidden { display: none; }
     </style>
 </head>
+
 <body>
     <?php include 'menu.php'; ?>
 
@@ -1266,71 +1481,296 @@ $contactos = $stmt->get_result();
         <h1>➕ Registrar Nuevo Gasto</h1>
 
         <form action="../backend/guardar_gasto.php" method="POST" id="formGasto">
-            
+
             <section class="form-section">
                 <h2 class="step-title">1. Información del Gasto</h2>
+
                 <div class="input-group">
-                    <label>Título del Gasto (ej: Cena Pizza)</label>
+                    <label>Título (ej: Cena Pizza)</label>
                     <input type="text" name="titulo" placeholder="¿Qué compraste?" required>
                 </div>
-                <div class="input-group">
-                    <label>Monto Total ($)</label>
-                    <input type="number" step="0.01" name="monto_total" id="monto_total" placeholder="0.00" required>
-                </div>
+
                 <div class="input-group">
                     <label>Fecha</label>
-                    <input type="date" name="fecha_gasto" value="<?php echo date('Y-m-d'); ?>" required>
+                    <input type="date" name="fecha_gasto" 
+                           value="<?php echo date('Y-m-d'); ?>" required>
                 </div>
-            </section>
 
-            <section class="form-section">
-                <h2 class="step-title">2. Participantes</h2>
-                <p><small>Selecciona tus contactos frecuentes o escribe nombres nuevos.</small></p>
-                <div id="lista-participantes">
-                    <div class="input-group">
-                        <input type="text" name="participantes[]" placeholder="Nombre del participante" required>
-                    </div>
-                </div>
-                <button type="button" class="btn-add" onclick="agregarParticipante()">+ Añadir Persona</button>
-            </section>
-
-            <section class="form-section">
-                <h2 class="step-title">3. Método de División</h2>
                 <div class="input-group">
-                    <select name="metodo_division" id="metodo_division" onchange="toggleMetodos()">
+                    <label>Método de División</label>
+                    <select name="metodo_division" id="metodo_division" onchange="cambiarMetodo()">
                         <option value="iguales">Por partes iguales</option>
                         <option value="porcentaje">Por porcentaje (%)</option>
                         <option value="articulos">Por artículos (Detallado)</option>
                     </select>
                 </div>
 
-                <div id="info-iguales" class="metodo-info">
-                    <p>El sistema dividirá el total automáticamente entre todos.</p>
-                </div>
-                
-                <div id="info-porcentaje" class="metodo-info hidden">
-                    <p>Asegúrate de que la suma de porcentajes sea 100%.</p>
+                <div class="input-group">
+                    <label>Monto Total ($)</label>
+                    <input type="number" step="0.01" name="monto_total" id="monto_total" 
+                           placeholder="0.00" oninput="recalcular()" required>
+                    <small id="aviso-auto" style="display:none; color: var(--indigo); font-weight:bold; margin-top:5px;">
+                        🤖 Calculado automáticamente por la suma de artículos.
+                    </small>
                 </div>
             </section>
 
-            <button type="submit" class="btn-login" style="width: 100%; background: #5a189a; color: white;">Registrar y Dividir</button>
+            <section class="form-section">
+                <h2 class="step-title">2. Participantes</h2>
+                <div id="container-participantes"></div>
+
+                <button type="button" class="btn-add" onclick="agregarParticipante()">
+                    <span>👤</span> Añadir Persona
+                </button>
+            </section>
+
+            <section class="form-section hidden" id="seccion-articulos">
+                <h2 class="step-title">3. Detalle de Artículos</h2>
+                <p><small>Añade los ítems del ticket y selecciona quién consumió cada uno.</small></p>
+
+                <div id="container-articulos"></div>
+
+                <button type="button" class="btn-add" onclick="agregarArticulo()">
+                    <span>🛒</span> Añadir Artículo
+                </button>
+            </section>
+
+            <button type="submit" class="btn-login" 
+                    style="width: 100%; background: #5a189a; color: white; margin-top:20px; padding: 15px; font-size: 1.1rem;">
+                💾 Guardar Gasto
+            </button>
         </form>
     </main>
 
     <script>
+        /* ===========================
+           0. ESTADO INICIAL
+        ============================ */
+        let participantes = [
+            { id: 1, nombre: 'Yo' },
+            { id: 2, nombre: '' }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderizarParticipantes();
+        });
+
+        /* ===========================
+           1. PARTICIPANTES
+        ============================ */
+        function renderizarParticipantes() {
+            const container = document.getElementById('container-participantes');
+            const metodo = document.getElementById('metodo_division').value;
+
+            container.innerHTML = '';
+
+            participantes.forEach((p, index) => {
+                const div = document.createElement('div');
+                div.className = 'fila-participante';
+
+                let html = `
+                    <input type="text" 
+                           name="nombres[]" 
+                           value="${p.nombre}" 
+                           placeholder="Nombre participante" 
+                           oninput="actualizarNombre(${index}, this.value)" 
+                           required>
+
+                    <input type="hidden" 
+                           name="montos_finales[]" 
+                           id="input-monto-${index}" 
+                           value="0">
+                `;
+
+                if (metodo === 'porcentaje') {
+                    html += `
+                        <input type="number" 
+                               name="porcentajes[]" 
+                               class="input-pct" 
+                               placeholder="%" 
+                               step="0.1" 
+                               oninput="recalcular()" 
+                               value="${p.porcentaje || 0}"> %
+                    `;
+                }
+
+                html += `<div class="info-calculo" id="pago-${index}">$0.00</div>`;
+
+                if (participantes.length > 1) {
+                    html += `
+                        <button type="button" 
+                                class="btn-remove" 
+                                title="Eliminar participante"
+                                onclick="eliminarParticipante(${index})">×</button>
+                    `;
+                }
+
+                div.innerHTML = html;
+                container.appendChild(div);
+            });
+
+            if (metodo === 'articulos') {
+                renderizarArticulos();
+            }
+
+            recalcular();
+        }
+
         function agregarParticipante() {
-            const container = document.getElementById('lista-participantes');
+            participantes.push({ id: Date.now(), nombre: '' });
+            renderizarParticipantes();
+        }
+
+        function eliminarParticipante(index) {
+            participantes.splice(index, 1);
+            renderizarParticipantes();
+        }
+
+        function actualizarNombre(index, valor) {
+            participantes[index].nombre = valor;
+
+            if (document.getElementById('metodo_division').value === 'articulos') {
+                document.querySelectorAll(`.label-nombre-${index}`)
+                    .forEach(span => span.innerText = valor || 'Persona ' + (index + 1));
+            }
+        }
+
+        /* ===========================
+           2. MÉTODO DE DIVISIÓN
+        ============================ */
+        function cambiarMetodo() {
+            const metodo = document.getElementById('metodo_division').value;
+            const seccionArticulos = document.getElementById('seccion-articulos');
+            const inputTotal = document.getElementById('monto_total');
+            const aviso = document.getElementById('aviso-auto');
+
+            if (metodo === 'articulos') {
+                seccionArticulos.classList.remove('hidden');
+                inputTotal.readOnly = true;
+                inputTotal.style.backgroundColor = '#e9ecef';
+                aviso.style.display = 'block';
+
+                if (document.getElementById('container-articulos').children.length === 0) {
+                    agregarArticulo();
+                }
+            } else {
+                seccionArticulos.classList.add('hidden');
+                inputTotal.readOnly = false;
+                inputTotal.style.backgroundColor = '#FAFAFA';
+                aviso.style.display = 'none';
+            }
+
+            renderizarParticipantes();
+        }
+
+        /* ===========================
+           3. ARTÍCULOS
+        ============================ */
+        function agregarArticulo() {
+            const container = document.getElementById('container-articulos');
             const div = document.createElement('div');
-            div.className = 'input-group';
-            div.innerHTML = '<input type="text" name="participantes[]" placeholder="Nombre del participante">';
+            div.className = 'item-row';
+
+            let checksHtml = '';
+            participantes.forEach((p, idx) => {
+                checksHtml += `
+                    <label class="check-pill">
+                        <input type="checkbox" 
+                               name="articulos_owners[]" 
+                               value="${idx}" 
+                               onchange="togglePill(this); recalcular()">
+
+                        <span class="label-nombre-${idx}">
+                            ${p.nombre || 'Persona ' + (idx + 1)}
+                        </span>
+                    </label>
+                `;
+            });
+
+            div.innerHTML = `
+                <input type="text" 
+                       name="articulos_nombres[]" 
+                       placeholder="Item (ej. Cervezas)" 
+                       style="flex-grow: 2; min-width: 150px;">
+
+                <input type="number" 
+                       step="0.01" 
+                       name="articulos_precios[]" 
+                       placeholder="$0.00" 
+                       class="precio-articulo" 
+                       style="width: 100px;" 
+                       oninput="recalcular()">
+
+                <button type="button" 
+                        class="btn-remove" 
+                        title="Eliminar artículo"
+                        onclick="this.parentElement.remove(); recalcular()">×</button>
+
+                <div class="participantes-item">
+                    ${checksHtml}
+                </div>
+            `;
+
             container.appendChild(div);
         }
 
-        function toggleMetodos() {
+        function togglePill(checkbox) {
+            checkbox.parentElement.classList.toggle('active', checkbox.checked);
+        }
+
+        /* ===========================
+           4. CÁLCULOS
+        ============================ */
+        function recalcular() {
             const metodo = document.getElementById('metodo_division').value;
-            document.querySelectorAll('.metodo-info').forEach(el => el.classList.add('hidden'));
-            if(metodo === 'porcentaje') document.getElementById('info-porcentaje').classList.remove('hidden');
-            if(metodo === 'iguales') document.getElementById('info-iguales').classList.remove('hidden');
+            const inputTotal = document.getElementById('monto_total');
+
+            let total = parseFloat(inputTotal.value) || 0;
+            let pagos = new Array(participantes.length).fill(0);
+
+            if (metodo === 'iguales') {
+                if (participantes.length > 0) {
+                    const montoIndividual = total / participantes.length;
+                    pagos.fill(montoIndividual);
+                }
+            } else if (metodo === 'porcentaje') {
+                const inputsPct = document.getElementsByName('porcentajes[]');
+                inputsPct.forEach((input, idx) => {
+                    const pct = parseFloat(input.value) || 0;
+                    pagos[idx] = total * (pct / 100);
+                });
+            } else if (metodo === 'articulos') {
+                let sumaTotalArticulos = 0;
+                const filasItems = document.querySelectorAll('.item-row');
+
+                filasItems.forEach(fila => {
+                    const precio = parseFloat(
+                        fila.querySelector('.precio-articulo').value
+                    ) || 0;
+
+                    sumaTotalArticulos += precio;
+
+                    const checks = fila.querySelectorAll('input[type="checkbox"]:checked');
+
+                    if (checks.length > 0) {
+                        const parte = precio / checks.length;
+                        checks.forEach(chk => {
+                            const idxParticipante = parseInt(chk.value);
+                            pagos[idxParticipante] += parte;
+                        });
+                    }
+                });
+
+                inputTotal.value = sumaTotalArticulos.toFixed(2);
+            }
+
+            pagos.forEach((monto, idx) => {
+                const el = document.getElementById(`pago-${idx}`);
+                const inputHidden = document.getElementById(`input-monto-${idx}`);
+
+                if (el) el.innerText = `$${monto.toFixed(2)}`;
+                if (inputHidden) inputHidden.value = monto.toFixed(2);
+            });
         }
     </script>
 </body>

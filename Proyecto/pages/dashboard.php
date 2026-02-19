@@ -77,7 +77,7 @@ if (!isset($_SESSION['usuario_id'])) {
     <main class="dashboard-container fade-in">
         <section class="welcome-section">
             <h1>¡Hola, <?php echo htmlspecialchars($_SESSION['usuario_nombre']); ?>! 👋</h1>
-            <p>¿Qué vamos a dividir hoy?</p>
+            <p>¿Qué vamos a gestionar hoy?</p>
         </section>
 
         <div class="grid-cards">
@@ -87,16 +87,22 @@ if (!isset($_SESSION['usuario_id'])) {
                 <p>Divide un gasto nuevo entre varias personas.</p>
             </a>
 
+            <a href="historial.php" class="card">
+                <i>📜</i>
+                <h3>Historial</h3>
+                <p>Revisa todas las cuentas y gastos que has registrado.</p>
+            </a>
+
             <a href="estadisticas.php" class="card">
                 <i>📊</i>
                 <h3>Estadísticas</h3>
-                <p>Mira tus ahorros, tendencias y gastos mensuales.</p>
+                <p>Mira tus tendencias, cuánto debes y cuánto te deben.</p>
             </a>
 
-            <a href="calculos.php" class="card">
-                <i>🧮</i>
-                <h3>Cálculos Rápidos</h3>
-                <p>Herramientas de cálculo predefinidas.</p>
+            <a href="contactos.php" class="card">
+                <i>👥</i>
+                <h3>Personas Frecuentes</h3>
+                <p>Gestiona tus contactos y salda deudas pendientes.</p>
             </a>
 
             <a href="gastos_fijos.php" class="card">
@@ -105,16 +111,16 @@ if (!isset($_SESSION['usuario_id'])) {
                 <p>Checklist de tus pagos mensuales recurrentes.</p>
             </a>
 
-            <a href="contactos.php" class="card">
-                <i>👥</i>
-                <h3>Personas Frecuentes</h3>
-                <p>Gestiona tus contactos para divisiones rápidas.</p>
+            <a href="calculos.php" class="card">
+                <i>🧮</i>
+                <h3>Cálculos Rápidos</h3>
+                <p>Herramientas de cálculo predefinidas (propinas, porcentajes).</p>
             </a>
 
-            <a href="#" class="card">
+            <a href="notificaciones.php" class="card">
                 <i>🔔</i>
                 <h3>Notificaciones</h3>
-                <p>Alertas de pagos y recordatorios.</p>
+                <p>Alertas de pagos fijos, recordatorios y deudas cruzadas.</p>
             </a>
         </div>
     </main>

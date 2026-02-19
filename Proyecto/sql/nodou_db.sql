@@ -51,6 +51,8 @@ CREATE TABLE gastos (
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
 
+ALTER TABLE gastos ADD COLUMN pagado_por VARCHAR(50) DEFAULT 'Yo';
+
 /* 5. Detalle de Gasto (Participantes) */
 CREATE TABLE detalle_gasto (
     id INT AUTO_INCREMENT PRIMARY KEY,

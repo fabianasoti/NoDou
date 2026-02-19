@@ -14,6 +14,11 @@ $pagina_actual = basename($_SERVER['PHP_SELF']);
                 </a>
             </li>
             <li>
+                <a href="historial.php" class="<?= $pagina_actual == 'historial.php' ? 'active' : '' ?>">
+                    Historial
+                </a>
+            </li>
+            <li>
                 <a href="nueva_cuenta.php" class="<?= $pagina_actual == 'nueva_cuenta.php' ? 'active' : '' ?>">
                     Dividir
                 </a>
@@ -31,6 +36,11 @@ $pagina_actual = basename($_SERVER['PHP_SELF']);
             <li>
                 <a href="contactos.php" class="<?= $pagina_actual == 'contactos.php' ? 'active' : '' ?>">
                     Contactos
+                </a>
+            </li>
+            <li>
+                <a href="notificaciones.php" class="<?= $pagina_actual == 'notificaciones.php' ? 'active' : '' ?>">
+                    Notificaciones
                 </a>
             </li>
         </ul>

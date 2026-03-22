@@ -83,3 +83,9 @@ CREATE TABLE gastos_fijos (
     completado_mes_actual BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
+
+-- 1. Añadimos la columna 'rol' por defecto como 'usuario'
+ALTER TABLE usuarios ADD COLUMN rol ENUM('usuario', 'admin') DEFAULT 'usuario';
+
+-- 2. Define tu usuario administrador (Cambia el correo por el tuyo)
+UPDATE usuarios SET rol = 'admin' WHERE email = 'info@fabiana.com';

@@ -3,10 +3,10 @@
 date_default_timezone_set('Europe/Madrid');
 
 // Datos de conexión (Basados en el script SQL que definimos)
-$host = "localhost";
-$user = "nodou";      // Usuario creado en el script SQL
-$pass = "Nodou123$";      // Contraseña definida en el script
-$db   = "nodou";        // Nombre de tu nueva base de datos
+$host = "sql311.infinityfree.com";
+$user = "if0_41114218";      // Usuario creado en el script SQL
+$pass = "UT1NtmXinHsa";      // Contraseña definida en el script
+$db   = "if0_41114218_nodou";        // Nombre de tu nueva base de datos
 
 // Habilitar el reporte de errores de MySQLi
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);

@@ -1,5 +1,6 @@
 <?php
 require_once '../config/conexion.php';
+require_once 'log_handler.php'; // <-- 1. IMPORTAMOS EL MANEJADOR DE LOGS
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // 1. Recoger datos y limpiar espacios
@@ -20,21 +21,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             exit();
         }
 
-        // 4. INSERTAR (Sin la columna 'rol')
-        // Tu tabla solo tiene: nombre, email, password. 
-        // fecha_creacion se llena sola por el DEFAULT CURRENT_TIMESTAMP
+        // 4. INSERTAR
         $stmt = $conexion->prepare("INSERT INTO usuarios (nombre, email, password) VALUES (?, ?, ?)");
         $stmt->bind_param("sss", $nombre, $email, $password_hash);
         
         if ($stmt->execute()) {
+            // <-- 2. OBTENEMOS EL ID DEL NUEVO USUARIO -->
+            $nuevo_usuario_id = $conexion->insert_id;
+
+            // <-- 3. REGISTRAMOS EL EVENTO EN EL JSON NOSQL -->
+            registrar_actividad(
+                $nuevo_usuario_id, 
+                "Registro de Cuenta", 
+                [
+                    "nombre" => $nombre, 
+                    "email" => $email,
+                    "metodo" => "Formulario de Registro"
+                ]
+            );
+            // <----------------------------------------------->
+
             // Éxito: Vamos al login
             header("Location: ../pages/login_vista.php?success=registro_ok");
+            exit();
         } else {
             echo "Error al insertar los datos.";
         }
 
     } catch (mysqli_sql_exception $e) {
-        // Si sale el error de columnas, aquí verás exactamente qué falló
         die("Error en el registro: " . $e->getMessage());
     }
 }

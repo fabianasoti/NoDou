@@ -8,7 +8,7 @@ require_once '../config/conexion.php';
 
 $usuario_id = $_SESSION['usuario_id'];
 
-// Consultamos todos los gastos y sus detalles en una sola búsqueda
+// Consultamos todos los gastos y sus detalles
 $query = "SELECT g.id as gasto_id, g.titulo, g.monto_total, g.fecha_gasto, g.metodo_division, g.pagado_por, 
                  d.id as detalle_id, d.nombre_participante, d.monto_asignado, d.pagado
           FROM gastos g
@@ -21,7 +21,6 @@ $stmt->bind_param("i", $usuario_id);
 $stmt->execute();
 $resultado = $stmt->get_result();
 
-// Agrupamos los resultados por Gasto
 $historial = [];
 while ($row = $resultado->fetch_assoc()) {
     $id = $row['gasto_id'];
@@ -30,13 +29,13 @@ while ($row = $resultado->fetch_assoc()) {
             'titulo' => $row['titulo'],
             'fecha' => $row['fecha_gasto'],
             'total' => $row['monto_total'],
-            'pagado_por' => $row['pagado_por'],
+            'pagado_por' => isset($row['pagado_por']) ? $row['pagado_por'] : 'Yo',
             'detalles' => []
         ];
     }
-    // Añadimos a los participantes
-    if ($row['nombre_participante']) {
+    if (!empty($row['nombre_participante'])) {
         $historial[$id]['detalles'][] = [
+            'detalle_id' => $row['detalle_id'], // ¡Añadimos el ID del detalle aquí!
             'nombre' => $row['nombre_participante'],
             'monto' => $row['monto_asignado'],
             'pagado' => $row['pagado']
@@ -57,9 +56,8 @@ while ($row = $resultado->fetch_assoc()) {
         .gasto-card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .gasto-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f0e6ff; padding-bottom: 15px; margin-bottom: 15px; }
         .gasto-titulo { font-size: 1.2rem; font-weight: bold; color: var(--indigo); margin: 0; }
-        .gasto-fecha { color: var(--gris-medio); font-size: 0.85rem; }
-        .gasto-total { font-size: 1.4rem; font-weight: bold; color: var(--gris-oscuro); }
-        
+        .gasto-fecha { color: #7f8c8d; font-size: 0.85rem; }
+        .gasto-total { font-size: 1.4rem; font-weight: bold; color: #2C3E50; }
         .detalle-lista { list-style: none; padding: 0; margin: 0; }
         .detalle-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed #eee; }
         .detalle-item:last-child { border-bottom: none; }
@@ -68,6 +66,26 @@ while ($row = $resultado->fetch_assoc()) {
         .badge-pagado { background-color: #e8f5e9; color: #2e7d32; }
         .badge-pendiente { background-color: #ffebee; color: #c62828; }
         .badge-yo { background-color: #e3f2fd; color: #1565c0; }
+        
+        /* Estilos para el nuevo botón de Marcar Pagado */
+        .btn-marcar-pagado {
+            background: #fff;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+            border-radius: 6px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: bold;
+            transition: all 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-marcar-pagado:hover {
+            background: #e8f5e9;
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
@@ -75,11 +93,17 @@ while ($row = $resultado->fetch_assoc()) {
 
     <main class="dashboard-container fade-in">
         <h1>📜 Historial de Gastos</h1>
-        <p style="color: var(--gris-medio); margin-bottom: 25px;">Revisa todas las cuentas que has registrado.</p>
+        <p style="color: #7f8c8d; margin-bottom: 25px;">Revisa todas las cuentas que has registrado y marca quién ya te pagó.</p>
+
+        <?php if (isset($_GET['msg']) && $_GET['msg'] == 'pagado'): ?>
+            <div style="background-color: #d4edda; color: #155724; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center;">
+                ¡Genial! Se ha marcado como pagado correctamente. 🎉
+            </div>
+        <?php endif; ?>
 
         <div class="historial-container">
             <?php if (empty($historial)): ?>
-                <div class="gasto-card" style="text-align: center; color: var(--gris-medio);">
+                <div class="gasto-card" style="text-align: center; color: #7f8c8d;">
                     No tienes gastos registrados aún. ¡Ve a "Dividir" para crear uno!
                 </div>
             <?php else: ?>
@@ -89,8 +113,8 @@ while ($row = $resultado->fetch_assoc()) {
                             <div>
                                 <h3 class="gasto-titulo"><?php echo htmlspecialchars($gasto['titulo']); ?></h3>
                                 <div style="font-size: 0.85rem; color: #7f8c8d; margin-top: 5px;">
-    Pagado por: <strong style="color: var(--indigo);"><?php echo htmlspecialchars($gasto['pagado_por']); ?></strong>
-</div>
+                                    Pagado por: <strong style="color: var(--indigo);"><?php echo htmlspecialchars($gasto['pagado_por']); ?></strong>
+                                </div>
                                 <span class="gasto-fecha"><?php echo date('d/m/Y', strtotime($gasto['fecha'])); ?></span>
                             </div>
                             <div class="gasto-total">
@@ -102,16 +126,23 @@ while ($row = $resultado->fetch_assoc()) {
                             <?php foreach ($gasto['detalles'] as $detalle): ?>
                                 <li class="detalle-item">
                                     <span>👤 <?php echo htmlspecialchars($detalle['nombre']); ?></span>
-                                    
-                                    <div style="display: flex; align-items: center; gap: 15px;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
                                         <strong>$<?php echo number_format($detalle['monto'], 2); ?></strong>
                                         
                                         <?php if (strtolower($detalle['nombre']) === 'yo'): ?>
                                             <span class="badge-estado badge-yo">Mi parte</span>
                                         <?php elseif ($detalle['pagado']): ?>
-                                            <span class="badge-estado badge-pagado">Pagado</span>
+                                            <span class="badge-estado badge-pagado">Pagado ✔️</span>
                                         <?php else: ?>
                                             <span class="badge-estado badge-pendiente">Pendiente</span>
+                                            
+                                            <form action="../backend/marcar_pagado.php" method="POST" style="margin: 0;">
+                                                <input type="hidden" name="detalle_id" value="<?php echo $detalle['detalle_id']; ?>">
+                                                <button type="submit" class="btn-marcar-pagado" onclick="return confirm('¿Confirmas que <?php echo htmlspecialchars($detalle['nombre']); ?> ya pagó su parte?');" title="Marcar como pagado">
+                                                    Recibido ✅
+                                                </button>
+                                            </form>
+                                            
                                         <?php endif; ?>
                                     </div>
                                 </li>

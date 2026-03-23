@@ -1,12 +1,12 @@
 <?php
 session_start();
 require_once '../config/conexion.php';
+require_once 'log_handler.php'; // <-- 1. IMPORTAMOS EL MANEJADOR DE LOGS
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
 
-    // 1. Ahora SÍ seleccionamos la columna 'rol'
     $stmt = $conexion->prepare("SELECT id, nombre, password, rol FROM usuarios WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
@@ -14,10 +14,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($row = $resultado->fetch_assoc()) {
         if (password_verify($password, $row['password'])) {
-            // Creamos las variables de sesión, incluyendo el rol
+            // Variables de sesión
             $_SESSION['usuario_id'] = $row['id'];
             $_SESSION['usuario_nombre'] = $row['nombre'];
             $_SESSION['usuario_rol'] = $row['rol'];
+
+            // <-- 2. REGISTRAMOS EL EVENTO EN EL JSON NOSQL -->
+            registrar_actividad(
+                $row['id'], 
+                "Inicio de Sesión", 
+                ["metodo" => "Formulario Web", "rol" => $row['rol']]
+            );
+            // <----------------------------------------------->
 
             // Redirigimos dependiendo del rol
             if ($row['rol'] === 'admin') {

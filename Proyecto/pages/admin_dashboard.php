@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once '../config/traductor.php';
 require_once '../config/conexion.php';
 
 // Verificamos que el usuario haya iniciado sesión y SEA ADMINISTRADOR
@@ -19,10 +20,10 @@ $resultado_usuarios = $conexion->query($query_usuarios);
 ?>
 
 <!DOCTYPE html>
-<html lang="es">
+<html lang="<?php echo obtener_idioma_actual(); ?>">
 <head>
     <meta charset="UTF-8">
-    <title>Panel de Administrador - NoDou</title>
+    <title><?php echo t('admin_panel'); ?> - NoDou</title>
     <link rel="stylesheet" href="../assets/css/estilos.css">
     <style>
         .admin-stats { background: var(--indigo); color: white; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 30px; }
@@ -41,10 +42,10 @@ $resultado_usuarios = $conexion->query($query_usuarios);
     <?php include 'menu.php'; ?>
 
     <main class="dashboard-container fade-in">
-        <h1>🛠️ Panel de Control Administrador</h1>
+        <h1>🛠️ <?php echo t('admin_panel'); ?></h1>
 
         <div class="admin-stats">
-            <p>Total de Usuarios Registrados</p>
+            <p><?php echo t('total_usuarios_registrados'); ?></p>
             <h2><?php echo $total_usuarios; ?></h2>
         </div>
 

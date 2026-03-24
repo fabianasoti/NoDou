@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once '../config/traductor.php';
 if (!isset($_SESSION['usuario_id'])) {
     header("Location: login_vista.php");
     exit();
@@ -75,10 +76,10 @@ $total_por_pagar = ($row4 && isset($row4['deuda'])) ? $row4['deuda'] : 0;
 ?>
 
 <!DOCTYPE html>
-<html lang="es">
+<html lang="<?php echo obtener_idioma_actual(); ?>">
 <head>
     <meta charset="UTF-8">
-    <title>Estadísticas - NoDou</title>
+    <title><?php echo t('estadisticas'); ?> - NoDou</title>
     <link rel="stylesheet" href="../assets/css/estilos.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -95,28 +96,28 @@ $total_por_pagar = ($row4 && isset($row4['deuda'])) ? $row4['deuda'] : 0;
 <body>
     <?php include 'menu.php'; ?>
     <main class="dashboard-container fade-in">
-        <h1 style="margin-bottom: 20px;">📊 Tus Tendencias Financieras</h1>
+        <h1 style="margin-bottom: 20px;">📊 <?php echo t('tus_tendencias'); ?></h1>
         <div class="cards-wrapper">
             <div class="summary-card card-main">
-                <h3>Gastado el último mes</h3>
+                <h3><?php echo t('gastado_ultimo_mes'); ?></h3>
                 <p style="font-size: 2rem; font-weight: bold;">$<?php echo number_format($ultimo_gasto_mes, 2); ?></p>
             </div>
             <div class="summary-card card-success">
-                <h3>Por Cobrar (Me deben)</h3>
+                <h3><?php echo t('por_cobrar_me_deben'); ?></h3>
                 <p style="font-size: 2rem; font-weight: bold;">$<?php echo number_format($total_por_cobrar, 2); ?></p>
             </div>
             <div class="summary-card card-danger">
-                <h3>Por Pagar (Debo)</h3>
+                <h3><?php echo t('por_pagar_debo'); ?></h3>
                 <p style="font-size: 2rem; font-weight: bold;">$<?php echo number_format($total_por_pagar, 2); ?></p>
             </div>
         </div>
         <div class="stats-container">
             <div class="chart-box">
-                <h3 style="text-align:center; color: var(--indigo); margin-bottom: 15px;">Comparación Mes a Mes</h3>
+                <h3 style="text-align:center; color: var(--indigo); margin-bottom: 15px;"><?php echo t('comparacion_mes_mes'); ?></h3>
                 <canvas id="chartMensual"></canvas>
             </div>
             <div class="chart-box">
-                <h3 style="text-align:center; color: var(--indigo); margin-bottom: 15px;">Gastos por Categoría</h3>
+                <h3 style="text-align:center; color: var(--indigo); margin-bottom: 15px;"><?php echo t('gastos_por_categoria'); ?></h3>
                 <canvas id="chartCategorias"></canvas>
             </div>
         </div>

@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once '../config/traductor.php';
 if (!isset($_SESSION['usuario_id'])) {
     header("Location: login_vista.php");
     exit();
@@ -45,11 +46,11 @@ while ($row = $resultado->fetch_assoc()) {
 ?>
 
 <!DOCTYPE html>
-<html lang="es">
+<html lang="<?php echo obtener_idioma_actual(); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Historial de Gastos - NoDou</title>
+    <title><?php echo t('historial'); ?> - NoDou</title>
     <link rel="stylesheet" href="../assets/css/estilos.css">
     <style>
         .historial-container { display: flex; flex-direction: column; gap: 20px; }
@@ -92,19 +93,19 @@ while ($row = $resultado->fetch_assoc()) {
     <?php include 'menu.php'; ?>
 
     <main class="dashboard-container fade-in">
-        <h1>📜 Historial de Gastos</h1>
-        <p style="color: #7f8c8d; margin-bottom: 25px;">Revisa todas las cuentas que has registrado y marca quién ya te pagó.</p>
+        <h1>📜 <?php echo t('historial_de_gastos'); ?></h1>
+        <p style="color: #7f8c8d; margin-bottom: 25px;"><?php echo t('revisa_todas'); ?></p>
 
         <?php if (isset($_GET['msg']) && $_GET['msg'] == 'pagado'): ?>
             <div style="background-color: #d4edda; color: #155724; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center;">
-                ¡Genial! Se ha marcado como pagado correctamente. 🎉
+                <?php echo t('genial_marcado'); ?>
             </div>
         <?php endif; ?>
 
         <div class="historial-container">
             <?php if (empty($historial)): ?>
                 <div class="gasto-card" style="text-align: center; color: #7f8c8d;">
-                    No tienes gastos registrados aún. ¡Ve a "Dividir" para crear uno!
+                    <?php echo t('no_gastos_aun'); ?>
                 </div>
             <?php else: ?>
                 <?php foreach ($historial as $gasto): ?>
@@ -113,7 +114,7 @@ while ($row = $resultado->fetch_assoc()) {
                             <div>
                                 <h3 class="gasto-titulo"><?php echo htmlspecialchars($gasto['titulo']); ?></h3>
                                 <div style="font-size: 0.85rem; color: #7f8c8d; margin-top: 5px;">
-                                    Pagado por: <strong style="color: var(--indigo);"><?php echo htmlspecialchars($gasto['pagado_por']); ?></strong>
+                                    <?php echo t('pagado_por'); ?> <strong style="color: var(--indigo);"><?php echo htmlspecialchars($gasto['pagado_por']); ?></strong>
                                 </div>
                                 <span class="gasto-fecha"><?php echo date('d/m/Y', strtotime($gasto['fecha'])); ?></span>
                             </div>
@@ -130,16 +131,16 @@ while ($row = $resultado->fetch_assoc()) {
                                         <strong>$<?php echo number_format($detalle['monto'], 2); ?></strong>
                                         
                                         <?php if (strtolower($detalle['nombre']) === 'yo'): ?>
-                                            <span class="badge-estado badge-yo">Mi parte</span>
+                                            <span class="badge-estado badge-yo"><?php echo t('mi_parte'); ?></span>
                                         <?php elseif ($detalle['pagado']): ?>
-                                            <span class="badge-estado badge-pagado">Pagado ✔️</span>
+                                            <span class="badge-estado badge-pagado"><?php echo t('pagado'); ?></span>
                                         <?php else: ?>
-                                            <span class="badge-estado badge-pendiente">Pendiente</span>
+                                            <span class="badge-estado badge-pendiente"><?php echo t('pendiente'); ?></span>
                                             
                                             <form action="../backend/marcar_pagado.php" method="POST" style="margin: 0;">
                                                 <input type="hidden" name="detalle_id" value="<?php echo $detalle['detalle_id']; ?>">
-                                                <button type="submit" class="btn-marcar-pagado" onclick="return confirm('¿Confirmas que <?php echo htmlspecialchars($detalle['nombre']); ?> ya pagó su parte?');" title="Marcar como pagado">
-                                                    Recibido ✅
+                                                <button type="submit" class="btn-marcar-pagado" onclick="return confirm('<?php echo t('confirmas_que_pago'); ?><?php echo htmlspecialchars($detalle['nombre']); ?><?php echo t('ya_pago_su_parte'); ?>');" title="<?php echo t('recibido'); ?>">
+                                                    <?php echo t('recibido'); ?>
                                                 </button>
                                             </form>
                                             

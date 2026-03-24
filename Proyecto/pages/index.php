@@ -1,9 +1,13 @@
+<?php
+session_start();
+require_once '../config/traductor.php';
+?>
 <!DOCTYPE html>
-<html lang="es">
+<html lang="<?php echo obtener_idioma_actual(); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NoDou - Cuentas claras, amistades largas</title>
+    <title>NoDou - <?php echo t('tagline'); ?></title>
     <link rel="stylesheet" href="../assets/css/estilos.css">
     <style>
         :root {
@@ -103,18 +107,18 @@
 
     <div class="hero-container fade-in">
         <div class="logo-placeholder">NoDou.</div>
-        <h1>Cuentas claras, amistades largas.</h1>
-        <p>La forma más elegante y sencilla de dividir gastos con amigos, familiares o compañeros de piso sin complicaciones.</p>
+        <h1><?php echo t('tagline'); ?></h1>
+        <p><?php echo t('descripcion_app'); ?></p>
         
         <div class="cta-buttons">
-            <a href="login_vista.php" class="btn btn-primary">Iniciar Sesión</a>
-            <a href="registro_vista.php" class="btn btn-secondary">Crear Cuenta</a>
+            <a href="login_vista.php" class="btn btn-primary"><?php echo t('iniciar_sesion'); ?></a>
+            <a href="registro_vista.php" class="btn btn-secondary"><?php echo t('registrarse'); ?></a>
         </div>
 
         <div class="features-preview">
-            <span>✓ División Inteligente</span>
-            <span>✓ Gastos Fijos</span>
-            <span>✓ Estadísticas</span>
+            <span><?php echo t('division_inteligente'); ?></span>
+            <span><?php echo t('gastos_fijos_feature'); ?></span>
+            <span><?php echo t('estadisticas_feature'); ?></span>
         </div>
     </div>
 

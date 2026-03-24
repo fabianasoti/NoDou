@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once '../config/traductor.php';
 if (!isset($_SESSION['usuario_id'])) {
     header("Location: login_vista.php");
     exit();
@@ -7,10 +8,10 @@ if (!isset($_SESSION['usuario_id'])) {
 ?>
 
 <!DOCTYPE html>
-<html lang="es">
+<html lang="<?php echo obtener_idioma_actual(); ?>">
 <head>
     <meta charset="UTF-8">
-    <title>Cálculos Rápidos - NoDou</title>
+    <title><?php echo t('calculos'); ?> - NoDou</title>
     <link rel="stylesheet" href="../assets/css/estilos.css">
     <style>
         .calc-container { max-width: 500px; margin: 0 auto; }
@@ -26,28 +27,28 @@ if (!isset($_SESSION['usuario_id'])) {
     <?php include 'menu.php'; ?>
 
     <main class="dashboard-container fade-in">
-        <h1 style="text-align:center;">🧮 Cálculos Rápidos</h1>
+        <h1 style="text-align:center;">🧮 <?php echo t('calculos'); ?></h1>
 
         <div class="calc-container">
             <div class="calc-card">
-                <h3>💰 Divisor con Propina</h3>
+                <h3>💰 <?php echo t('divisor_con_propina'); ?></h3>
                 <div class="input-row">
-                    <label>Monto Total del Ticket</label>
+                    <label><?php echo t('monto_total_ticket'); ?></label>
                     <input type="number" id="monto" placeholder="0.00" oninput="calcularPropina()">
                 </div>
                 <div class="input-row">
-                    <label>% de Propina</label>
+                    <label>% <?php echo t('de_propina'); ?></label>
                     <input type="number" id="propina_pct" value="10" oninput="calcularPropina()">
                 </div>
                 <div class="input-row">
-                    <label>¿Entre cuántos?</label>
+                    <label><?php echo t('entre_cuantos'); ?></label>
                     <input type="number" id="personas" value="2" oninput="calcularPropina()">
                 </div>
 
                 <div class="res-box">
-                    <p>Cada uno paga:</p>
+                    <p><?php echo t('cada_uno_paga'); ?></p>
                     <div class="res-val" id="total_cada_uno">$0.00</div>
-                    <small id="detalle_propina">(Incluye $0.00 de propina total)</small>
+                    <small id="detalle_propina"><?php echo t('detalle_propina'); ?></small>
                 </div>
             </div>
 

@@ -1,18 +1,18 @@
 <?php
 session_start();
+require_once '../config/traductor.php';
 // Si no hay sesión, redirigimos al login
 if (!isset($_SESSION['usuario_id'])) {
     header("Location: login_vista.php");
     exit();
 }
 ?>
-
 <!DOCTYPE html>
-<html lang="es">
+<html lang="<?php echo obtener_idioma_actual(); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - NoDou</title>
+    <title><?php echo t('dashboard'); ?> - NoDou</title>
     <link rel="stylesheet" href="../assets/css/estilos.css">
     <style>
         /* Estilos específicos para el Grid del Dashboard */
@@ -76,27 +76,27 @@ if (!isset($_SESSION['usuario_id'])) {
 
     <main class="dashboard-container fade-in">
         <section class="welcome-section">
-            <h1>¡Hola, <?php echo htmlspecialchars($_SESSION['usuario_nombre']); ?>! 👋</h1>
-            <p>¿Qué vamos a gestionar hoy?</p>
+            <h1><?php echo t('hola'); ?><?php echo htmlspecialchars($_SESSION['usuario_nombre']); ?>! 👋</h1>
+            <p><?php echo t('que_vamos_gestionar'); ?></p>
         </section>
 
         <div class="grid-cards">
             <a href="nueva_cuenta.php" class="card">
                 <i>➕</i>
-                <h3>Nueva Cuenta</h3>
-                <p>Divide un gasto nuevo entre varias personas.</p>
+                <h3><?php echo t('nueva_cuenta'); ?></h3>
+                <p><?php echo t('divide_gasto_nuevo'); ?></p>
             </a>
 
             <a href="historial.php" class="card">
                 <i>📜</i>
-                <h3>Historial</h3>
-                <p>Revisa todas las cuentas y gastos que has registrado.</p>
+                <h3><?php echo t('historial_gastos'); ?></h3>
+                <p><?php echo t('revisa_cuentas'); ?></p>
             </a>
 
             <a href="estadisticas.php" class="card">
                 <i>📊</i>
-                <h3>Estadísticas</h3>
-                <p>Mira tus tendencias, cuánto debes y cuánto te deben.</p>
+                <h3><?php echo t('estadisticas'); ?></h3>
+                <p><?php echo t('mira_tendencias'); ?></p>
             </a>
 
             <a href="contactos.php" class="card">

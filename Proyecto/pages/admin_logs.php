@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once '../config/traductor.php';
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_rol'] !== 'admin') {
     header("Location: dashboard.php");
     exit("Acceso denegado");
@@ -16,10 +17,10 @@ if (file_exists($archivo_log)) {
 ?>
 
 <!DOCTYPE html>
-<html lang="es">
+<html lang="<?php echo obtener_idioma_actual(); ?>">
 <head>
     <meta charset="UTF-8">
-    <title>Logs del Sistema - NoDou</title>
+    <title><?php echo t('logs'); ?> - NoDou</title>
     <link rel="stylesheet" href="../assets/css/estilos.css">
     <style>
         .json-viewer { background: #2C3E50; color: #a6e22e; padding: 15px; border-radius: 8px; font-family: monospace; overflow-x: auto; white-space: pre-wrap; font-size: 0.85rem;}
@@ -32,21 +33,21 @@ if (file_exists($archivo_log)) {
     <?php include 'menu.php'; ?>
 
     <main class="dashboard-container fade-in">
-        <h1>🖥️ Monitor de Eventos (NoSQL JSON)</h1>
-        <p>Lectura directa desde el archivo JSON sin usar la base de datos relacional.</p>
+        <h1>🖥️ <?php echo t('monitor_eventos'); ?></h1>
+        <p><?php echo t('lectura_json_descripcion'); ?></p>
 
         <table class="log-table">
             <thead>
                 <tr>
-                    <th>Fecha y Hora</th>
-                    <th>ID Usuario</th>
-                    <th>Acción</th>
-                    <th>Detalle Dinámico (JSON)</th>
+                    <th><?php echo t('fecha_hora'); ?></th>
+                    <th><?php echo t('id_usuario'); ?></th>
+                    <th><?php echo t('accion'); ?></th>
+                    <th><?php echo t('detalle_dinamico'); ?></th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (empty($logs)): ?>
-                    <tr><td colspan="4" style="text-align: center;">No hay registros de actividad aún.</td></tr>
+                    <tr><td colspan="4" style="text-align: center;"><?php echo t('no_registros_actividad'); ?></td></tr>
                 <?php else: ?>
                     <?php foreach ($logs as $log): ?>
                         <tr>

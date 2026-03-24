@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once '../config/traductor.php';
 if (!isset($_SESSION['usuario_id'])) {
     header("Location: login_vista.php");
     exit();
@@ -22,11 +23,11 @@ while ($row = $res_contactos->fetch_assoc()) {
 ?>
 
 <!DOCTYPE html>
-<html lang="es">
+<html lang="<?php echo obtener_idioma_actual(); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nueva Cuenta - NoDou</title>
+    <title><?php echo t('dividir'); ?> - NoDou</title>
     <link rel="stylesheet" href="../assets/css/estilos.css">
     <style>
         .form-section { background: white; padding: 25px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
@@ -60,73 +61,73 @@ while ($row = $res_contactos->fetch_assoc()) {
     </datalist>
 
     <main class="dashboard-container fade-in">
-        <h1>➕ Registrar Nuevo Gasto</h1>
+        <h1>➕ <?php echo t('registrar_nuevo_gasto'); ?></h1>
 
         <form action="../backend/guardar_gasto.php" method="POST" id="formGasto">
 
             <section class="form-section">
-                <h2 class="step-title">1. Información del Gasto</h2>
+                <h2 class="step-title">1. <?php echo t('info_gasto'); ?></h2>
 
                 <div class="input-group">
-                    <label>Título (ej: Cena Pizza)</label>
-                    <input type="text" name="titulo" placeholder="¿Qué compraste?" required>
+                    <label><?php echo t('titulo'); ?> (ej: Cena Pizza)</label>
+                    <input type="text" name="titulo" placeholder="<?php echo t('que_compraste'); ?>" required>
                 </div>
 
                 <div class="input-group">
-                    <label>Fecha</label>
+                    <label><?php echo t('fecha'); ?></label>
                     <input type="date" name="fecha_gasto" 
                            value="<?php echo date('Y-m-d'); ?>" required>
                 </div>
 
                 <div class="input-group">
-                    <label>Método de División</label>
+                    <label><?php echo t('metodo_division'); ?></label>
                     <select name="metodo_division" id="metodo_division" onchange="cambiarMetodo()">
-                        <option value="iguales">Por partes iguales</option>
-                        <option value="porcentaje">Por porcentaje (%)</option>
-                        <option value="articulos">Por artículos (Detallado)</option>
+                        <option value="iguales"><?php echo t('partes_iguales'); ?></option>
+                        <option value="porcentaje"><?php echo t('por_porcentaje'); ?></option>
+                        <option value="articulos"><?php echo t('por_articulos'); ?></option>
                     </select>
                 </div>
 
                 <div class="input-group">
-                    <label>Monto Total ($)</label>
+                    <label><?php echo t('monto_total'); ?></label>
                     <input type="number" step="0.01" name="monto_total" id="monto_total" 
-                           placeholder="0.00" oninput="recalcular()" required>
+                           placeholder="<?php echo t('monto_placeholder'); ?>" oninput="recalcular()" required>
                     <small id="aviso-auto" style="display:none; color: var(--indigo); font-weight:bold; margin-top:5px;">
-                        🤖 Calculado automáticamente por la suma de artículos.
+                        <?php echo t('calculado_automaticamente'); ?>
                     </small>
                 </div>
             </section>
 
             <section class="form-section">
-                <h2 class="step-title">2. Participantes</h2>
+                <h2 class="step-title">2. <?php echo t('participantes_section'); ?></h2>
                 <div id="container-participantes"></div>
 
                 <button type="button" class="btn-add" onclick="agregarParticipante()">
-                    <span>👤</span> Añadir Persona
+                    <span>👤</span> <?php echo t('anadir_persona'); ?>
                 </button>
             </section>
 
             <section class="form-section hidden" id="seccion-articulos">
-                <h2 class="step-title">3. Detalle de Artículos</h2>
-                <p><small>Añade los ítems del ticket y selecciona quién consumió cada uno.</small></p>
+                <h2 class="step-title">3. <?php echo t('detalle_articulos'); ?></h2>
+                <p><small><?php echo t('aniade_personas'); ?></small></p>
 
                 <div id="container-articulos"></div>
 
                 <button type="button" class="btn-add" onclick="agregarArticulo()">
-                    <span>🛒</span> Añadir Artículo
+                    <span>🛒</span> <?php echo t('anadir_articulo'); ?>
                 </button>
             </section>
 
             <div class="input-group" style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-                <label style="display:block; margin-bottom: 10px; color: var(--indigo); font-weight:bold;">¿Quién pagó la cuenta entera?</label>
+                <label style="display:block; margin-bottom: 10px; color: var(--indigo); font-weight:bold;"><?php echo t('quien_pago'); ?></label>
                 <select name="pagado_por" id="select_pagador" style="font-weight: bold; width: 100%; padding: 12px; border: 1px solid var(--gris-suave); border-radius: 10px; background-color: #FAFAFA;">
-                    <option value="Yo">Yo (Me deben dinero)</option>
+                    <option value="Yo"><?php echo t('me_deben_dinero'); ?></option>
                 </select>
             </div>
 
             <button type="submit" class="btn-login" 
                     style="width: 100%; background: #5a189a; color: white; margin-top:20px; padding: 15px; font-size: 1.1rem;">
-                💾 Guardar Gasto
+                💾 <?php echo t('guardar_gasto'); ?>
             </button>
         </form>
     </main>

@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once '../config/traductor.php';
 if (!isset($_SESSION['usuario_id'])) {
     header("Location: login_vista.php");
     exit();
@@ -16,10 +17,10 @@ $resultado = $stmt->get_result();
 ?>
 
 <!DOCTYPE html>
-<html lang="es">
+<html lang="<?php echo obtener_idioma_actual(); ?>">
 <head>
     <meta charset="UTF-8">
-    <title>Gastos Fijos - NoDou</title>
+    <title><?php echo t('gastos_fijos'); ?> - NoDou</title>
     <link rel="stylesheet" href="../assets/css/estilos.css">
     <style>
         .checklist-container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -35,28 +36,28 @@ $resultado = $stmt->get_result();
     <?php include 'menu.php'; ?>
 
     <main class="dashboard-container fade-in">
-        <h1 style="text-align:center;">📅 Mis Gastos Fijos</h1>
-        <p style="text-align:center; color: #666; margin-bottom: 20px;">Controla tus pagos recurrentes del mes</p>
+        <h1 style="text-align:center;">📅 <?php echo t('mis_gastos_fijos'); ?></h1>
+        <p style="text-align:center; color: #666; margin-bottom: 20px;"><?php echo t('controla_recurrentes'); ?></p>
 
         <section class="form-section" style="max-width: 600px; margin: 0 auto 30px auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-            <h3 style="margin-bottom: 15px; color: var(--indigo);">➕ Nuevo Gasto Fijo</h3>
+            <h3 style="margin-bottom: 15px; color: var(--indigo);">➕ <?php echo t('nuevo_gasto_fijo'); ?></h3>
             <form action="../backend/gestionar_fijos.php" method="POST" style="display: grid; gap: 10px;">
                 <input type="hidden" name="accion" value="crear">
                 <div>
-                    <label style="font-size: 0.8rem; font-weight: bold;">Título</label>
-                    <input type="text" name="titulo" placeholder="Ej: Netflix, Alquiler..." required>
+                    <label style="font-size: 0.8rem; font-weight: bold;"><?php echo t('titulo_label'); ?></label>
+                    <input type="text" name="titulo" placeholder="<?php echo t('ej_netflix'); ?>" required>
                 </div>
                 <div style="display: flex; gap: 10px;">
                     <div style="flex: 1;">
-                        <label style="font-size: 0.8rem; font-weight: bold;">Monto ($)</label>
+                        <label style="font-size: 0.8rem; font-weight: bold;"><?php echo t('monto_label'); ?></label>
                         <input type="number" step="0.01" name="monto_estimado" placeholder="0.00" required>
                     </div>
                     <div style="flex: 1;">
-                        <label style="font-size: 0.8rem; font-weight: bold;">Día de cobro (1-31)</label>
-                        <input type="number" name="dia_vencimiento" min="1" max="31" placeholder="15" required>
+                        <label style="font-size: 0.8rem; font-weight: bold;"><?php echo t('dia_cobro'); ?></label>
+                        <input type="number" name="dia_vencimiento" min="1" max="31" placeholder="<?php echo t('dia_valor'); ?>" required>
                     </div>
                 </div>
-                <button type="submit" class="btn-login" style="margin-top: 10px;">Guardar Gasto Fijo</button>
+                <button type="submit" class="btn-login" style="margin-top: 10px;"><?php echo t('guardar_fijo'); ?></button>
             </form>
         </section>
 
@@ -64,13 +65,13 @@ $resultado = $stmt->get_result();
             <?php while($gasto = $resultado->fetch_assoc()): ?>
                 <div class="gasto-fijo-item">
                     <div class="info-pago">
-                        <span class="dia-badge">Día <?php echo $gasto['dia_vencimiento']; ?></span>
+                        <span class="dia-badge"><?php echo t('dia_badge'); ?><?php echo $gasto['dia_vencimiento']; ?></span>
                         <div>
                             <strong class="<?php echo $gasto['completado_mes_actual'] ? 'completado' : ''; ?>">
                                 <?php echo htmlspecialchars($gasto['titulo']); ?>
                             </strong>
                             <br>
-                            <small>$<?php echo number_format($gasto['monto_estimado'], 2); ?></small>
+                            <small><?php echo t('monto_fijo'); ?><?php echo number_format($gasto['monto_estimado'], 2); ?></small>
                         </div>
                     </div>
                     
@@ -91,7 +92,7 @@ $resultado = $stmt->get_result();
             <?php endwhile; ?>
             
             <?php if ($resultado->num_rows == 0): ?>
-                <p style="text-align:center; padding: 20px;">No tienes gastos fijos registrados.</p>
+                <p style="text-align:center; padding: 20px;"><?php echo t('no_gastos_fijos'); ?></p>
             <?php endif; ?>
         </div>
     </main>

@@ -2,12 +2,12 @@
 // Obtenemos el nombre del archivo actual para resaltar el enlace activo
 $pagina_actual = basename($_SERVER['PHP_SELF']);
 
-// Importamos nuestro diccionario de idiomas
-require_once '../config/idiomas.php';
+// Importamos el traductor
+require_once '../config/traductor.php';
 
 // Determinamos qué idioma mostrar en el botón de cambio
-$idioma_cambio = ($idioma_actual === 'es') ? 'en' : 'es';
-$bandera = ($idioma_actual === 'es') ? '🇺🇸' : '🇪🇸';
+$idioma_cambio = (obtener_idioma_actual() === 'es') ? 'en' : 'es';
+$bandera = (obtener_idioma_actual() === 'es') ? '🇺🇸' : '🇪🇸';
 ?>
 
 <nav class="navbar">

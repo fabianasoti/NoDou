@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once '../config/traductor.php';
 if (!isset($_SESSION['usuario_id'])) { header("Location: login_vista.php"); exit(); }
 require_once '../config/conexion.php';
 $usuario_id = $_SESSION['usuario_id'];
@@ -42,10 +43,10 @@ $deudas_pagar = $stmt3->get_result();
 ?>
 
 <!DOCTYPE html>
-<html lang="es">
+<html lang="<?php echo obtener_idioma_actual(); ?>">
 <head>
     <meta charset="UTF-8">
-    <title>Notificaciones - NoDou</title>
+    <title><?php echo t('notificaciones'); ?> - NoDou</title>
     <link rel="stylesheet" href="../assets/css/estilos.css">
     <style>
         .notif-section { background: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }

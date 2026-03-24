@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once '../config/traductor.php';
 require_once '../config/conexion.php';
 
 if (!isset($_SESSION['usuario_id'])) {
@@ -44,10 +45,10 @@ $resultado = $stmt->get_result();
 ?>
 
 <!DOCTYPE html>
-<html lang="es">
+<html lang="<?php echo obtener_idioma_actual(); ?>">
 <head>
     <meta charset="UTF-8">
-    <title>Contactos - NoDou</title>
+    <title><?php echo t('contactos'); ?> - NoDou</title>
     <link rel="stylesheet" href="../assets/css/estilos.css">
     <style>
         .contact-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
@@ -76,12 +77,12 @@ $resultado = $stmt->get_result();
     <?php include 'menu.php'; ?>
 
     <main class="dashboard-container fade-in">
-        <h1>👥 Mis Personas Frecuentes</h1>
+        <h1>👥 <?php echo t('mis_personas_frecuentes'); ?></h1>
         
         <form action="../backend/contacto_accion.php" method="POST" class="add-contact-form">
             <input type="hidden" name="accion" value="crear">
-            <input type="text" name="nombre_contacto" placeholder="Nombre del nuevo contacto..." required style="margin:0;">
-            <button type="submit" style="width: auto; padding: 0 25px;">Añadir</button>
+            <input type="text" name="nombre_contacto" placeholder="<?php echo t('nombre_contacto'); ?>" required style="margin:0;">
+            <button type="submit"><?php echo t('anadir_contacto'); ?></button>
         </form>
 
         <div class="contact-grid">

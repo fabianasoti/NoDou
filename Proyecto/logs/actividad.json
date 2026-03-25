@@ -1,5 +1,36 @@
 [
     {
+        "_id": "log_69c3a9701b1d1",
+        "fecha_hora": "2026-03-25 10:22:56",
+        "usuario_id": 3,
+        "accion": "Inicio de Sesi\u00f3n",
+        "detalles": {
+            "metodo": "Formulario Web",
+            "rol": "admin"
+        }
+    },
+    {
+        "_id": "log_69c3a71807bd7",
+        "fecha_hora": "2026-03-25 10:12:56",
+        "usuario_id": 9,
+        "accion": "Inicio de Sesi\u00f3n",
+        "detalles": {
+            "metodo": "Formulario Web",
+            "rol": "usuario"
+        }
+    },
+    {
+        "_id": "log_69c3a70d889cc",
+        "fecha_hora": "2026-03-25 10:12:45",
+        "usuario_id": 9,
+        "accion": "Registro de Cuenta",
+        "detalles": {
+            "nombre": "Benito",
+            "email": "benito@ejemplo.com",
+            "metodo": "Formulario de Registro"
+        }
+    },
+    {
         "_id": "log_69c3381043ce6",
         "fecha_hora": "2026-03-25 02:19:12",
         "usuario_id": 3,

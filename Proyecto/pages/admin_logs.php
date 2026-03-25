@@ -55,7 +55,7 @@ if (file_exists($archivo_log)) {
                             <td>Usuario #<?php echo $log['usuario_id']; ?></td>
                             <td><strong><?php echo $log['accion']; ?></strong></td>
                             <td>
-                                <div class="json-viewer"><?php echo json_encode($log['detalles']); ?></div>
+                                <div class="json-viewer"><?php echo json_encode($log['detalles'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE); ?></div>
                             </td>
                         </tr>
                     <?php endforeach; ?>

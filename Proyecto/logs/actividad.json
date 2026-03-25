@@ -1,5 +1,77 @@
 [
     {
+        "_id": "log_69c3d2063bb63",
+        "fecha_hora": "2026-03-25 13:16:06",
+        "usuario_id": 3,
+        "accion": "Inicio de Sesi\u00f3n",
+        "detalles": {
+            "metodo": "Formulario Web",
+            "rol": "admin"
+        }
+    },
+    {
+        "_id": "log_69c3d1d2e69a6",
+        "fecha_hora": "2026-03-25 13:15:14",
+        "usuario_id": 3,
+        "accion": "Inicio de Sesi\u00f3n",
+        "detalles": {
+            "metodo": "Formulario Web",
+            "rol": "admin"
+        }
+    },
+    {
+        "_id": "log_69c3c69fc2d40",
+        "fecha_hora": "2026-03-25 12:27:27",
+        "usuario_id": 3,
+        "accion": "Inicio de Sesi\u00f3n",
+        "detalles": {
+            "metodo": "Formulario Web",
+            "rol": "admin"
+        }
+    },
+    {
+        "_id": "log_69c3c46bb40e8",
+        "fecha_hora": "2026-03-25 12:18:03",
+        "usuario_id": 11,
+        "accion": "Inicio de Sesi\u00f3n",
+        "detalles": {
+            "metodo": "Formulario Web",
+            "rol": "usuario"
+        }
+    },
+    {
+        "_id": "log_69c3c45f1aa00",
+        "fecha_hora": "2026-03-25 12:17:51",
+        "usuario_id": 11,
+        "accion": "Registro de Cuenta",
+        "detalles": {
+            "nombre": "Gustavo",
+            "email": "gustavo@info.com",
+            "metodo": "Formulario de Registro"
+        }
+    },
+    {
+        "_id": "log_69c3b4b497c9a",
+        "fecha_hora": "2026-03-25 11:11:00",
+        "usuario_id": 3,
+        "accion": "Inicio de Sesi\u00f3n",
+        "detalles": {
+            "metodo": "Formulario Web",
+            "rol": "admin"
+        }
+    },
+    {
+        "_id": "log_69c3b4aa484c3",
+        "fecha_hora": "2026-03-25 11:10:50",
+        "usuario_id": 10,
+        "accion": "Registro de Cuenta",
+        "detalles": {
+            "nombre": "ema",
+            "email": "ema@info.com",
+            "metodo": "Formulario de Registro"
+        }
+    },
+    {
         "_id": "log_69c3a9701b1d1",
         "fecha_hora": "2026-03-25 10:22:56",
         "usuario_id": 3,

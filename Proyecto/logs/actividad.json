@@ -1,5 +1,65 @@
 [
     {
+        "_id": "log_69c516d233745",
+        "fecha_hora": "2026-03-26 12:21:54",
+        "usuario_id": 3,
+        "accion": "Pago Recibido",
+        "detalles": {
+            "detalle_id": 19,
+            "metodo": "Confirmaci\u00f3n manual"
+        }
+    },
+    {
+        "_id": "log_69c5153cb74a4",
+        "fecha_hora": "2026-03-26 12:15:08",
+        "usuario_id": 3,
+        "accion": "Inicio de Sesi\u00f3n",
+        "detalles": {
+            "metodo": "Formulario Web",
+            "rol": "admin"
+        }
+    },
+    {
+        "_id": "log_69c5150c730cc",
+        "fecha_hora": "2026-03-26 12:14:20",
+        "usuario_id": 3,
+        "accion": "Inicio de Sesi\u00f3n",
+        "detalles": {
+            "metodo": "Formulario Web",
+            "rol": "admin"
+        }
+    },
+    {
+        "_id": "log_69c5138d15798",
+        "fecha_hora": "2026-03-26 12:07:57",
+        "usuario_id": 3,
+        "accion": "Inicio de Sesi\u00f3n",
+        "detalles": {
+            "metodo": "Formulario Web",
+            "rol": "admin"
+        }
+    },
+    {
+        "_id": "log_69c5134a72a8c",
+        "fecha_hora": "2026-03-26 12:06:50",
+        "usuario_id": 3,
+        "accion": "Inicio de Sesi\u00f3n",
+        "detalles": {
+            "metodo": "Formulario Web",
+            "rol": "admin"
+        }
+    },
+    {
+        "_id": "log_69c4fe39c676c",
+        "fecha_hora": "2026-03-26 10:36:57",
+        "usuario_id": 3,
+        "accion": "Inicio de Sesi\u00f3n",
+        "detalles": {
+            "metodo": "Formulario Web",
+            "rol": "admin"
+        }
+    },
+    {
         "_id": "log_69c3d2063bb63",
         "fecha_hora": "2026-03-25 13:16:06",
         "usuario_id": 3,

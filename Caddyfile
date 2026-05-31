@@ -1,0 +1,9 @@
+{
+    frankenphp
+    admin off
+}
+
+:{$PORT:8080} {
+    root * /app/Proyecto
+    php_server
+}

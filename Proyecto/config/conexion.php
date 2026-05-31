@@ -1,12 +1,10 @@
 <?php
-// Configuración de la zona horaria para que coincida con tus registros de gastos
 date_default_timezone_set('Europe/Madrid');
 
-// Datos de conexión (Basados en el script SQL que definimos)
-$host = "localhost";
-$user = "nodou";      // Usuario creado en el script SQL
-$pass = "Nodou123$";      // Contraseña definida en el script
-$db   = "nodou";        // Nombre de tu nueva base de datos
+$host = getenv('DB_HOST') ?: 'localhost';
+$user = getenv('DB_USER') ?: 'nodou';
+$pass = getenv('DB_PASS') ?: 'Nodou123$';
+$db   = getenv('DB_NAME') ?: 'nodou';
 
 // Habilitar el reporte de errores de MySQLi
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);

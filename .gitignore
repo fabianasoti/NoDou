@@ -1,0 +1,3 @@
+.env
+Proyecto/vendor/
+Proyecto/logs/*.json

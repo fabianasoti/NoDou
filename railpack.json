@@ -1,4 +1,5 @@
 {
+  "$schema": "https://schema.railpack.com",
   "provider": "php",
-  "start": "php -S 0.0.0.0:$PORT -t Proyecto"
+  "buildAptPackages": ["php8.2-mysqli", "php8.2-mbstring"]
 }

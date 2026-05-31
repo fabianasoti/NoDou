@@ -1,5 +1,5 @@
 {
   "$schema": "https://schema.railpack.com",
   "provider": "php",
-  "buildAptPackages": ["php8.2-mysqli", "php8.2-mbstring"]
+  "buildAptPackages": []
 }

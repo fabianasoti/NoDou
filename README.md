@@ -1,65 +1,112 @@
-# NoDou 💸
+# NoDou
 
-**NoDou** es una aplicación web multiplataforma diseñada para facilitar la división y organización de gastos entre amigos, parejas o compañeros de trabajo. Permite llevar un registro claro de las cuentas, registrar transacciones y asignar pagos de manera sencilla y sin complicaciones.
+**NoDou** es una app web para dividir y organizar gastos entre amigos, pareja o compañeros de trabajo. Registra transacciones, asigna pagos por persona o por artículo, y lleva el balance al día sin complicaciones.
 
-> 🛠️ **Estado del proyecto:** En desarrollo activo.
-
----
-
-## ✨ Características Principales
-
-* **Gestión de Usuarios:** Roles diferenciados (Administrador y Usuario) para mantener el control de los grupos de gastos.
-* **División Inteligente:** Permite dividir cuentas a partes iguales o asignar el costo de artículos específicos a personas concretas.
-* **Historial Detallado:** Registro completo de todas las transacciones, quién pagó qué y quién debe a quién.
-* **Panel de Estadísticas:** Visualización clara de los gastos totales y el balance de cada participante.
-* **Interfaz Intuitiva:** Diseño *responsive* adaptable a dispositivos móviles y escritorio.
+Demo en vivo → *(próximamente)*
 
 ---
 
-## 📸 Capturas de Pantalla
+## Características
 
-*(Aquí mostramos algunas vistas principales de la aplicación)*
+- **3 métodos de división:** a partes iguales, por porcentaje, o artículo por artículo
+- **Historial completo:** quién pagó qué y quién debe a quién, con estado pagado/pendiente
+- **Estadísticas visuales:** gráficas mensuales y balance general con Chart.js
+- **Gastos fijos:** alquiler, suscripciones y recurrentes con alertas de vencimiento
+- **Centro de notificaciones:** deudas pendientes y gastos fijos por vencer en un solo lugar
+- **Dark mode** y soporte bilingüe (español / inglés)
+- **Panel de administración** con visor de logs de actividad
+- Diseño responsive adaptado a móvil y escritorio
 
-| Panel Principal | División de Gastos |
-| :---: | :---: |
-| ![Home User](img_nodou/homeuser.png) | ![Dividir Gastos](img_nodou/dividir.png) |
+---
+
+## Stack
+
+| Capa | Tecnología |
+|------|-----------|
+| Frontend | HTML5, CSS3, JavaScript (Vanilla), Chart.js |
+| Backend | PHP 8.2 |
+| Base de datos | MySQL |
+| Testing | PHPUnit |
+
+---
+
+## Capturas
+
+| Panel principal | Dividir gastos |
+|:-:|:-:|
+| ![Home](Imágenes/homeuser.png) | ![Dividir](Imágenes/dividir.png) |
 | **Estadísticas** | **Historial** |
-| ![Estadisticas](img_nodou/estadisticas.png) | ![Historial](img_nodou/historial.png) |
+| ![Estadísticas](Imágenes/estadisticas.png) | ![Historial](Imágenes/historial.png) |
 
 ---
 
-## 💻 Tecnologías Utilizadas
+## Instalación local
 
-Este proyecto ha sido desarrollado aplicando conocimientos de **Desarrollo Web Full-Stack**:
+### Requisitos
+- PHP 8.0+
+- MySQL 5.7+
+- Composer (solo si quieres correr los tests)
 
-* **Frontend:** HTML5, CSS3, JavaScript (Vanilla).
-* **Backend:** PHP (Estructurado con controladores para la gestión de rutas y lógica de negocio).
-* **Base de Datos:** MySQL (Diseño relacional para usuarios, grupos y transacciones).
+### Pasos
+
+1. Clona el repositorio:
+   ```bash
+   git clone https://github.com/fabianasoti/NoDou.git
+   cd NoDou
+   ```
+
+2. Importa el esquema de base de datos:
+   ```bash
+   mysql -u root -p < sql/nodou_db.sql
+   ```
+
+3. Configura las variables de entorno. Copia el ejemplo y edita con tus credenciales:
+   ```bash
+   cp .env.example .env
+   # edita .env con tu editor preferido
+   ```
+   O bien exporta las variables directamente en tu terminal:
+   ```bash
+   export DB_HOST=localhost
+   export DB_USER=nodou
+   export DB_PASS=tu_contraseña
+   export DB_NAME=nodou
+   ```
+
+4. Levanta el servidor local apuntando a la carpeta `Proyecto/`:
+   ```bash
+   php -S localhost:8000 -t Proyecto
+   ```
+
+5. Abre `http://localhost:8000` en tu navegador.
 
 ---
 
-## 🚀 Instalación y Despliegue Local
+## Deploy en Railway
 
-Si deseas probar el proyecto en tu entorno local, sigue estos pasos:
-
-1.  **Clona este repositorio:**
-    ```bash
-    git clone [https://github.com/fabianasoti/nodou.git](https://github.com/fabianasoti/nodou.git)
-    ```
-2.  **Configura el servidor local:**
-    Asegúrate de tener instalado un entorno como XAMPP, WAMP o LAMP. Mueve la carpeta del proyecto a tu directorio público (ej. `htdocs` en XAMPP).
-3.  **Base de Datos:**
-    * Abre phpMyAdmin (o tu gestor preferido de MySQL).
-    * Crea una base de datos llamada `nodou_db` (o el nombre que uses).
-    * Importa el archivo `.sql` que se encuentra en la carpeta `database/` (si lo tienes) para generar las tablas.
-4.  **Configuración de Conexión:**
-    Edita el archivo de conexión a la base de datos (`config.php`) con tus credenciales locales.
-5.  **¡Listo!** Abre tu navegador y accede a `http://localhost/nodou`.
+1. Sube el proyecto a GitHub.
+2. En [railway.app](https://railway.app), crea un nuevo proyecto y añade:
+   - Un servicio **PHP** conectado al repo.
+   - Un plugin **MySQL**.
+3. En Variables de entorno del servicio PHP, añade `DB_HOST`, `DB_USER`, `DB_PASS` y `DB_NAME` con los valores que Railway genera para el plugin MySQL.
+4. Railway detecta el `nixpacks.toml` automáticamente y usa `Proyecto/` como web root.
+5. En el plugin MySQL, importa el esquema desde `sql/nodou_db.sql`.
 
 ---
 
-## 👩‍💻 Autora
+## Tests
 
-**Fabiana Victoria Sotillo**
-* Estudiante de Desarrollo de Aplicaciones Multiplataforma (DAM).
-* [Mi Portafolio Web](https://fabianasoti.github.io/Portafolio/)
+```bash
+cd Proyecto
+composer install
+./vendor/bin/phpunit tests/
+```
+
+---
+
+## Autora
+
+**Fabiana Victoria Sotillo** — estudiante de DAM
+- Portafolio: [fabianasoti.github.io/Portafolio](https://fabianasoti.github.io/Portafolio/)
+- GitHub: [@fabianasoti](https://github.com/fabianasoti)
+- LinkedIn: [fabianasotillo](https://www.linkedin.com/in/fabianasotillo/)

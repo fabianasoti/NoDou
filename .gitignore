@@ -1,1 +1,7 @@
+<<<<<<< HEAD
 make_slides.py
+=======
+.env
+Proyecto/vendor/
+Proyecto/logs/*.json
+>>>>>>> d48da28affa550b5db93f73402d02e54001a2846
